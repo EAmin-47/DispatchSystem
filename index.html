@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microwave Dispatch System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/000000/workflow.png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #ecf0f1;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding: 0 15px;
+      animation: fadeIn 0.8s ease;
+    }
+    
+    .logo {
+      font-size: 2.4rem;
+      margin-bottom: 10px;
+      color: #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    h1 {
+      font-size: 2.4rem;
+      margin-bottom: 10px;
+      color: #fff;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      color: #bdc3c7;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 25px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    
+    @media (min-width: 900px) {
+      .dashboard {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .card {
+      background: rgba(44, 62, 80, 0.95);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+    }
+    
+    .date-display {
+      font-size: 1rem;
+      color: #bdc3c7;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px 15px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    
+    .assignment-display {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 30px 25px;
+      border-radius: 12px;
+      margin: 15px 0 25px;
+      text-align: center;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .assignment-display::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    .assignment-display.active::before {
+      opacity: 1;
+    }
+    
+    .assigned-member {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #2ecc71;
+      text-align: center;
+      animation: fadeIn 0.5s ease, pulse 1.5s ease 0.5s;
+    }
+    
+    .progress-container {
+      margin: 20px 0;
+    }
+    
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+    
+    .progress-bar {
+      height: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 7px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, #3498db, #2ecc71);
+      border-radius: 7px;
+      transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    
+    .button-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    @media (min-width: 480px) {
+      .button-group {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: white;
+      border: none;
+      padding: 14px 10px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .btn:hover::after {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(to right, #3498db, #2980b9);
+    }
+    
+    .btn-secondary {
+      background: linear-gradient(to right, #7f8c8d, #95a5a6);
+    }
+    
+    .btn-success {
+      background: linear-gradient(to right, #27ae60, #2ecc71);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(to right, #e74c3c, #c0392b);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(to right, #f39c12, #e67e22);
+    }
+    
+    .btn-info {
+      background: linear-gradient(to right, #00c9ff, #92fe9d);
+    }
+    
+    .btn:disabled {
+      background: #555 !important;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .btn:disabled:hover::after {
+      left: -100%;
+    }
+    
+    .btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn i {
+      font-size: 1.2rem;
+    }
+    
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .team-member {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    
+    .team-member:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.12);
+    }
+    
+    .team-member.assigned {
+      background: rgba(46, 204, 113, 0.15);
+      border-left: 4px solid #2ecc71;
+    }
+    
+    .team-member.unavailable {
+      background: rgba(231, 76, 60, 0.15);
+      border-left: 4px solid #e74c3c;
+    }
+    
+    .member-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .member-name {
+      font-weight: 500;
+      font-size: 1rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: none; /* Hidden by default */
+    }
+    
+    .team-member.assigned .member-name {
+      display: block; /* Show when assigned */
+    }
+    
+    .assignment-history {
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    
+    .history-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(5px);
+    }
+    
+    .history-time {
+      font-size: 0.9rem;
+      color: #bdc3c7;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+    
+    .info-box {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .info-box i {
+      color: #3498db;
+      font-size: 1.3rem;
+    }
+    
+    .admin-panel,
+    .export-panel {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      border-left: 4px solid #e74c3c;
+    }
+    
+    .admin-panel h3,
+    .export-panel h3 {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #e74c3c;
+    }
+    
+    .login-panel {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 25px;
+      margin: 20px auto;
+      max-width: 400px;
+      text-align: center;
+      border-left: 4px solid #3498db;
+    }
+    
+    .login-panel h3 {
+      margin-bottom: 15px;
+      color: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .login-input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1rem;
+    }
+    
+    .login-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.15);
+    }
+    
+    #loginButton {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .logout-btn,
+    .theme-toggle-btn {
+      position: absolute;
+      top: 20px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 20;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .logout-btn {
+      left: 20px;
+      background: linear-gradient(to right, #e74c3c, #c0392b);
+      color: white;
+    }
+    
+    .theme-toggle-btn {
+      right: 20px;
+      background: linear-gradient(to right, #00c9ff, #92fe9d);
+      color: white;
+    }
+    
+    .error-message {
+      color: #e74c3c;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      min-height: 20px;
+      text-align: center;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #bdc3c7;
+      font-size: 0.9rem;
+      padding: 15px 0;
+    }
+    
+    .date-picker {
+      margin: 15px 0;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .date-picker label {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    
+    .date-picker input {
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 0.95rem;
+    }
+    
+    .export-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+    
+    @media (min-width: 600px) {
+      .export-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .export-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 10px;
+      border-radius: 10px;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .export-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .export-btn:hover::after {
+      left: 100%;
+    }
+    
+    .export-btn i {
+      font-size: 1.2rem;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      max-width: 350px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .toast.success {
+      border-left: 4px solid #2ecc71;
+    }
+    
+    .toast.error {
+      border-left: 4px solid #e74c3c;
+    }
+    
+    .toast.warning {
+      border-left: 4px solid #f39c12;
+    }
+    
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background: rgba(44, 62, 80, 0.95);
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+    
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #e74c3c;
+    }
+    
+    .modal-body {
+      margin-bottom: 20px;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    /* Confirmation dialog */
+    .confirmation-dialog {
+      text-align: center;
+    }
+    
+    .confirmation-message {
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    /* Input group */
+    .input-group {
+      margin-bottom: 15px;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .input-group input, 
+    .input-group select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 0.95rem;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); text-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+      50% { transform: scale(1.05); text-shadow: 0 0 20px rgba(46, 204, 113, 0.8); }
+      100% { transform: scale(1); text-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #3498db;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2980b9;
+    }
+    
+    @media (max-width: 768px) {
+      .logo {
+        font-size: 2rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .card-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      
+      .date-display {
+        width: 100%;
+      }
+      
+      .assigned-member {
+        font-size: 1.6rem;
+      }
+      
+      .team-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+      
+      .button-group {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .logout-btn,
+      .theme-toggle-btn {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        margin: 10px auto;
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+      
+      .logo {
+        font-size: 1.8rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .card-title {
+        font-size: 1.3rem;
+      }
+      
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .assigned-member {
+        font-size: 1.4rem;
+      }
+      
+      .button-group {
+        gap: 12px;
+      }
+      
+      .btn {
+        padding: 12px 8px;
+        font-size: 0.95rem;
+      }
+      
+      .toast {
+        width: calc(100% - 30px);
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+      }
+    }
+    
+    /* Light theme styles */
+    body.light-theme {
+      background: linear-gradient(135deg, #f5f7fa, #e4e8ed);
+      color: #2c3e50;
+    }
+    
+    body.light-theme .card {
+      background: rgba(255, 255, 255, 0.95);
+      color: #2c3e50;
+    }
+    
+    body.light-theme .team-member {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    
+    body.light-theme .team-member:hover {
+      background: rgba(0, 0, 0, 0.08);
+    }
+    
+    body.light-theme .assignment-display {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    
+    body.light-theme .login-input,
+    body.light-theme .input-group input,
+    body.light-theme .input-group select,
+    body.light-theme .date-picker input {
+      background: rgba(0, 0, 0, 0.05);
+      color: #2c3e50;
+    }
+    
+    body.light-theme .history-item,
+    body.light-theme .info-box,
+    body.light-theme .admin-panel,
+    body.light-theme .export-panel {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    
+    body.light-theme .card-header,
+    body.light-theme .history-item {
+      border-bottom-color: rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="appContainer">
+    <header>
+      <div class="logo">
+        <i class="fas fa-satellite-dish"></i>
+        <span>AWCC Microwave Dispatch</span>
+      </div>
+      <h1>Team Assignment System</h1>
+      <p class="subtitle">Manage team assignments with daily rotation and fair distribution</p>
+    </header>
+
+    <div class="login-panel" id="loginPanel">
+      <h3><i class="fas fa-lock"></i> Admin Login</h3>
+      <p>Enter admin password to access management features</p>
+      <input type="password" class="login-input" id="adminPassword" placeholder="Admin Password">
+      <div class="error-message" id="errorMessage"></div>
+      <button class="btn btn-primary" id="loginButton">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+    </div>
+
+    <div class="dashboard" id="dashboard" style="display: none;">
+      <button class="logout-btn btn btn-danger" id="logoutButton">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+      <button class="theme-toggle-btn btn btn-info" id="themeToggleButton">
+        <i class="fas fa-moon"></i> Toggle Theme
+      </button>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-tasks"></i> Assignment</h2>
+          <div class="date-display" id="currentDate">Loading date...</div>
+        </div>
+
+        <div class="assignment-display" id="assignmentDisplay">
+          <p id="assignmentPrompt">System loading...</p>
+          <div class="assigned-member" id="assignedMember"></div>
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-header">
+            <span>Daily Progress</span>
+            <span id="progressText">0/0 assigned</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" id="assignButton" disabled>
+            <i class="fas fa-user-check"></i> Assign
+          </button>
+          <button class="btn btn-warning" id="resetButton" disabled>
+            <i class="fas fa-redo"></i> Reset
+          </button>
+          <button class="btn btn-success" id="addMemberButton" disabled>
+            <i class="fas fa-user-plus"></i> Add
+          </button>
+          <button class="btn btn-danger" id="deleteMemberButton" disabled>
+            <i class="fas fa-user-minus"></i> Delete
+          </button>
+        </div>
+
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          <p>System will automatically assign each available team member once per day. The team order shuffles at midnight to ensure fair distribution of assignments.</p>
+        </div>
+
+        <div class="admin-panel" id="adminPanel">
+          <h3><i class="fas fa-user-shield"></i> Admin Management</h3>
+          <p>Change system password:</p>
+          <input type="password" class="login-input" id="newPassword" placeholder="New Password">
+          <input type="password" class="login-input" id="confirmPassword" placeholder="Confirm Password">
+          <button class="btn btn-primary" id="changePasswordBtn" style="width: 100%; margin-top: 10px;">
+            <i class="fas fa-key"></i> Change Password
+          </button>
+        </div>
+
+        <div class="export-panel" id="exportPanel">
+          <h3><i class="fas fa-file-export"></i> Data Export</h3>
+          <p>Export assignment records for reporting and analysis</p>
+          <div class="date-picker">
+            <label for="exportStartDate">From:</label>
+            <input type="date" id="exportStartDate">
+            <label for="exportEndDate">To:</label>
+            <input type="date" id="exportEndDate">
+          </div>
+          <div class="export-options">
+            <button class="export-btn" id="exportTodayBtn">
+              <i class="fas fa-file-excel"></i> Today's Data
+            </button>
+            <button class="export-btn" id="exportRangeBtn">
+              <i class="fas fa-file-csv"></i> Date Range
+            </button>
+            <button class="export-btn" id="exportAllBtn">
+              <i class="fas fa-file-archive"></i> All Data
+            </button>
+            <button class="export-btn" id="backupBtn">
+              <i class="fas fa-database"></i> Full Backup
+            </button>
+            <button class="export-btn" id="importBtn">
+              <i class="fas fa-upload"></i> Restore
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title"><i class="fas fa-users"></i> Team Overview</h2>
+        </div>
+        <div class="team-grid" id="teamContainer"></div>
+        <div class="card-header" style="margin-top: 15px;">
+          <h2 class="card-title"><i class="fas fa-history"></i> Assignment History</h2>
+        </div>
+        <div class="assignment-history" id="historyContainer"></div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Dispatch System v3.2.2 | © 2025 AWCC Microwave Team</p>
+    </footer>
+  </div>
+
+  <!-- Modal for member management -->
+  <div class="modal-overlay" id="memberModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Add Team Member</h3>
+        <button class="modal-close" id="modalClose">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label for="memberName">Full Name</label>
+          <input type="text" id="memberName" placeholder="Enter member's full name">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="modalCancel">Cancel</button>
+        <button class="btn btn-success" id="modalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="confirmTitle">Confirm Action</h3>
+        <button class="modal-close" id="confirmClose">×</button>
+      </div>
+      <div class="modal-body confirmation-dialog">
+        <p class="confirmation-message" id="confirmMessage">Are you sure you want to perform this action?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="confirmCancel">Cancel</button>
+        <button class="btn btn-success" id="confirmAction">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer"></div>
+  <input type="file" id="importFile" style="display: none;" accept=".json">
+
+  <script>
+    const DEFAULT_ADMIN_PASSWORD = "awccmw@123";
+    const MASTER_PASSWORD = "AWCC@Master@123"; // Master password that always works
+    const VERSION = "v3.2.2";
+
+    let team = [
+      "Hamdurahman Samim",
+      "Matiullah Mati",
+      "Habibullah Paktin",
+      "Mohammad Salim Popalzai",
+      "Najibullah Najib",
+      "Salar Sangar",
+      "Rohullah Akbari",
+      "Rohullah Abrar",
+      "Khan Wali"
+    ];
+
+    const today = new Date();
+    const todayKey = today.toISOString().split('T')[0];
+    const listKey = `dispatch_${todayKey}`;
+    const countKey = `dispatch_count_${todayKey}`;
+    const historyKey = `dispatch_history_${todayKey}`;
+    const teamKey = "dispatch_team";
+    const adminPasswordKey = "dispatch_admin_password";
+    const allHistoryKey = "dispatch_all_history";
+    const themeKey = "dispatch_theme";
+
+    let isAdmin = false;
+    let currentAction = null;
+    let selectedMemberIndex = null;
+
+    // DOM elements
+    const currentDateEl = document.getElementById('currentDate');
+    const assignedMemberEl = document.getElementById('assignedMember');
+    const assignmentPromptEl = document.getElementById('assignmentPrompt');
+    const progressTextEl = document.getElementById('progressText');
+    const progressFillEl = document.getElementById('progressFill');
+    const teamContainerEl = document.getElementById('teamContainer');
+    const historyContainerEl = document.getElementById('historyContainer');
+    const assignButton = document.getElementById('assignButton');
+    const resetButton = document.getElementById('resetButton');
+    const addMemberButton = document.getElementById('addMemberButton');
+    const deleteMemberButton = document.getElementById('deleteMemberButton');
+    const adminPanel = document.getElementById('adminPanel');
+    const loginPanel = document.getElementById('loginPanel');
+    const dashboard = document.getElementById('dashboard');
+    const adminPasswordInput = document.getElementById('adminPassword');
+    const loginButton = document.getElementById('loginButton');
+    const logoutButton = document.getElementById('logoutButton');
+    const errorMessageEl = document.getElementById('errorMessage');
+    const exportPanel = document.getElementById('exportPanel');
+    const exportTodayBtn = document.getElementById('exportTodayBtn');
+    const exportRangeBtn = document.getElementById('exportRangeBtn');
+    const exportAllBtn = document.getElementById('exportAllBtn');
+    const backupBtn = document.getElementById('backupBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+    const exportStartDate = document.getElementById('exportStartDate');
+    const exportEndDate = document.getElementById('exportEndDate');
+    const toastContainer = document.getElementById('toastContainer');
+    const newPasswordInput = document.getElementById('newPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const themeToggleButton = document.getElementById('themeToggleButton');
+    const assignmentDisplay = document.getElementById('assignmentDisplay');
+    const memberModal = document.getElementById('memberModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const memberNameInput = document.getElementById('memberName');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalClose = document.getElementById('modalClose');
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmAction = document.getElementById('confirmAction');
+    const confirmCancel = document.getElementById('confirmCancel');
+    const confirmClose = document.getElementById('confirmClose');
+
+    function showToast(message, type = 'success', duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = {
+        success: '<i class="fas fa-check-circle"></i>',
+        error: '<i class="fas fa-exclamation-circle"></i>',
+        warning: '<i class="fas fa-exclamation-triangle"></i>'
+      }[type] || '<i class="fas fa-info-circle"></i>';
+      toast.innerHTML = `${icon} ${message}`;
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    function updateDateTime() {
+      const now = new Date();
+      currentDateEl.textContent = now.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function loadTeam() {
+      try {
+        const storedTeam = localStorage.getItem(teamKey);
+        if (storedTeam) {
+          team = JSON.parse(storedTeam);
+        } else {
+          localStorage.setItem(teamKey, JSON.stringify(team));
+        }
+      } catch (e) {
+        console.error('Error loading team:', e);
+        showToast('Failed to load team data', 'error');
+      }
+    }
+
+    function shuffleArray(array) {
+      let shuffled = array.slice();
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function initializeDailyData() {
+      try {
+        const lastDate = localStorage.getItem('dispatch_last_date');
+        if (lastDate !== todayKey || !localStorage.getItem(listKey)) {
+          const shuffled = shuffleArray(team);
+          localStorage.setItem(listKey, JSON.stringify(shuffled));
+          localStorage.setItem(countKey, '0');
+          localStorage.setItem(historyKey, JSON.stringify([]));
+          localStorage.setItem('dispatch_last_date', todayKey);
+        }
+        updateUI();
+      } catch (e) {
+        console.error('Error initializing daily data:', e);
+        showToast('Failed to initialize data', 'error');
+      }
+    }
+
+    function updateUI() {
+      try {
+        const list = JSON.parse(localStorage.getItem(listKey) || '[]');
+        const count = parseInt(localStorage.getItem(countKey) || '0');
+        const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+
+        const progressPercent = team.length > 0 ? (count / team.length) * 100 : 0;
+        progressFillEl.style.width = `${progressPercent}%`;
+        progressTextEl.textContent = `${count}/${team.length} assigned`;
+
+        if (count > 0) {
+          assignmentPromptEl.textContent = 'Assigned Team Member:';
+          assignedMemberEl.textContent = list[count - 1];
+          assignmentDisplay.classList.add('active');
+          assignedMemberEl.classList.add('pulse');
+        } else {
+          assignmentPromptEl.textContent = isAdmin ? 'Click Assign to select a team member' : 'No assignments yet';
+          assignedMemberEl.textContent = '';
+          assignmentDisplay.classList.remove('active');
+          assignedMemberEl.classList.remove('pulse');
+        }
+
+        // Update team display with numbers only, show names when assigned
+        teamContainerEl.innerHTML = '';
+        list.forEach((member, index) => {
+          const isAssigned = index < count;
+          const memberEl = document.createElement('div');
+          memberEl.className = `team-member ${isAssigned ? 'assigned' : ''}`;
+          
+          memberEl.innerHTML = `
+            <div class="member-number">${index + 1}</div>
+            <div class="member-name">${member}</div>
+          `;
+          teamContainerEl.appendChild(memberEl);
+        });
+
+        historyContainerEl.innerHTML = history.length === 0
+          ? '<p style="text-align: center; padding: 15px; color: rgba(255,255,255,0.6);">No assignments yet</p>'
+          : history.map(item => `
+              <div class="history-item">
+                <div class="history-member">${item.member}</div>
+                <div class="history-time">${item.time}</div>
+              </div>
+            `).join('');
+
+      } catch (e) {
+        console.error('Error updating UI:', e);
+        showToast('Failed to update UI', 'error');
+      }
+    }
+
+    function showMemberModal(action, index = null) {
+      try {
+        currentAction = action;
+        selectedMemberIndex = index;
+        
+        if (action === 'add') {
+          modalTitle.textContent = 'Add Team Member';
+          memberNameInput.value = '';
+        } else if (action === 'edit') {
+          modalTitle.textContent = 'Edit Team Member';
+          memberNameInput.value = team[selectedMemberIndex];
+        }
+        
+        memberModal.classList.add('active');
+        memberNameInput.focus();
+      } catch (e) {
+        console.error('Error showing member modal:', e);
+        showToast('Failed to show member modal', 'error');
+      }
+    }
+
+    function hideMemberModal() {
+      try {
+        memberModal.classList.remove('active');
+        memberNameInput.value = '';
+        currentAction = null;
+        selectedMemberIndex = null;
+      } catch (e) {
+        console.error('Error hiding member modal:', e);
+        showToast('Failed to hide member modal', 'error');
+      }
+    }
+
+    function showConfirmationModal(title, message, callback) {
+      try {
+        confirmTitle.textContent = title;
+        confirmMessage.textContent = message;
+        confirmAction._callback = callback;
+        confirmAction.addEventListener('click', callback);
+        confirmModal.classList.add('active');
+      } catch (e) {
+        console.error('Error showing confirmation modal:', e);
+        showToast('Failed to show confirmation modal', 'error');
+      }
+    }
+
+    function hideConfirmationModal() {
+      try {
+        confirmModal.classList.remove('active');
+        confirmAction.removeEventListener('click', confirmAction._callback);
+      } catch (e) {
+        console.error('Error hiding confirmation modal:', e);
+        showToast('Failed to hide confirmation modal', 'error');
+      }
+    }
+
+    function checkAdminStatus() {
+      try {
+        errorMessageEl.textContent = '';
+        if (!adminPasswordInput.value) {
+          errorMessageEl.textContent = 'Please enter password';
+          return false;
+        }
+        
+        const storedPassword = localStorage.getItem(adminPasswordKey) || DEFAULT_ADMIN_PASSWORD;
+        const enteredPassword = adminPasswordInput.value.trim();
+        
+        // Check against stored password or master password
+        if (enteredPassword === storedPassword || enteredPassword === MASTER_PASSWORD) {
+          isAdmin = true;
+          handleAdminAccess();
+          return true;
+        } else {
+          errorMessageEl.textContent = 'Incorrect password';
+          adminPasswordInput.value = '';
+          return false;
+        }
+      } catch (e) {
+        console.error('Error during login:', e);
+        showToast('Login error', 'error');
+        return false;
+      }
+    }
+
+    function handleAdminAccess() {
+      try {
+        loginPanel.style.display = 'none';
+        dashboard.style.display = 'grid';
+        assignButton.disabled = false;
+        resetButton.disabled = false;
+        addMemberButton.disabled = false;
+        deleteMemberButton.disabled = false;
+        adminPanel.style.display = 'block';
+        exportPanel.style.display = 'block';
+        assignmentPromptEl.textContent = 'Click Assign to select a team member';
+        exportStartDate.value = todayKey;
+        exportEndDate.value = todayKey;
+        updateUI();
+        showToast('Logged in successfully');
+      } catch (e) {
+        console.error('Error handling admin access:', e);
+        showToast('Failed to load dashboard', 'error');
+      }
+    }
+
+    function logout() {
+      try {
+        isAdmin = false;
+        loginPanel.style.display = 'block';
+        dashboard.style.display = 'none';
+        adminPasswordInput.value = '';
+        updateUI();
+        showToast('Logged out');
+      } catch (e) {
+        console.error('Error during logout:', e);
+        showToast('Logout error', 'error');
+      }
+    }
+
+    function changePassword() {
+      try {
+        const newPassword = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        if (!newPassword || !confirmPassword) {
+          showToast('Please fill both password fields', 'error');
+          return;
+        }
+        if (newPassword.length < 6) {
+          showToast('Password must be at least 6 characters', 'error');
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          showToast('Passwords do not match', 'error');
+          return;
+        }
+        localStorage.setItem(adminPasswordKey, newPassword);
+        newPasswordInput.value = '';
+        confirmPasswordInput.value = '';
+        showToast('Password changed successfully');
+      } catch (e) {
+        console.error('Error changing password:', e);
+        showToast('Failed to change password', 'error');
+      }
+    }
+
+    function addNewMember() {
+      try {
+        showMemberModal('add');
+      } catch (e) {
+        console.error('Error opening add member modal:', e);
+        showToast('Failed to open add member modal', 'error');
+      }
+    }
+
+    function deleteMember() {
+      try {
+        if (team.length <= 1) {
+          showToast('At least one team member required', 'error');
+          return;
+        }
+        
+        const memberList = team.map((m, i) => `${i + 1}. ${m}`).join('\n');
+        const memberNumber = prompt(`Select member to delete:\n\n${memberList}`);
+        const index = parseInt(memberNumber) - 1;
+        if (isNaN(index) || index < 0 || index >= team.length) {
+          showToast('Invalid member selection', 'error');
+          return;
+        }
+        
+        const memberName = team[index];
+        showConfirmationModal(
+          'Delete Team Member',
+          `Are you sure you want to delete ${memberName}? This action cannot be undone.`,
+          () => {
+            try {
+              team.splice(index, 1);
+              localStorage.setItem(teamKey, JSON.stringify(team));
+              
+              let currentList = JSON.parse(localStorage.getItem(listKey) || '[]');
+              currentList = currentList.filter(name => name !== memberName);
+              localStorage.setItem(listKey, JSON.stringify(currentList));
+              
+              const count = parseInt(localStorage.getItem(countKey) || '0');
+              if (count > currentList.length) {
+                localStorage.setItem(countKey, currentList.length.toString());
+              }
+              
+              updateUI();
+              showToast(`Deleted: ${memberName}`);
+              hideConfirmationModal();
+            } catch (e) {
+              console.error('Error deleting member:', e);
+              showToast('Failed to delete member', 'error');
+            }
+          }
+        );
+      } catch (e) {
+        console.error('Error initiating delete:', e);
+        showToast('Failed to initiate delete', 'error');
+      }
+    }
+
+    function saveMember() {
+      try {
+        const name = memberNameInput.value.trim();
+        
+        if (!name || name.length < 3) {
+          showToast('Name must be at least 3 characters', 'error');
+          return;
+        }
+        
+        if (currentAction === 'add') {
+          if (team.some(m => m.toLowerCase() === name.toLowerCase())) {
+            showToast('Member with this name already exists', 'error');
+            return;
+          }
+          
+          team.push(name);
+          localStorage.setItem(teamKey, JSON.stringify(team));
+          
+          let currentList = JSON.parse(localStorage.getItem(listKey) || '[]');
+          currentList.push(name);
+          localStorage.setItem(listKey, JSON.stringify(currentList));
+          
+          showToast(`Added: ${name}`);
+        } else if (currentAction === 'edit') {
+          const oldName = team[selectedMemberIndex];
+          if (oldName !== name && team.some(m => m.toLowerCase() === name.toLowerCase())) {
+            showToast('Member with this name already exists', 'error');
+            return;
+          }
+          
+          team[selectedMemberIndex] = name;
+          localStorage.setItem(teamKey, JSON.stringify(team));
+          
+          let currentList = JSON.parse(localStorage.getItem(listKey) || '[]');
+          const index = currentList.indexOf(oldName);
+          if (index !== -1) {
+            currentList[index] = name;
+            localStorage.setItem(listKey, JSON.stringify(currentList));
+          }
+          
+          showToast(`Updated: ${name}`);
+        }
+        
+        hideMemberModal();
+        updateUI();
+      } catch (e) {
+        console.error('Error saving member:', e);
+        showToast('Failed to save member', 'error');
+      }
+    }
+
+    function assignTeamMember() {
+      try {
+        if (!team.length) {
+          showToast('No team members available', 'error');
+          return;
+        }
+        
+        const list = JSON.parse(localStorage.getItem(listKey) || '[]');
+        let count = parseInt(localStorage.getItem(countKey) || '0');
+        
+        if (count >= list.length) {
+          showToast('All team members have been assigned today', 'warning');
+          return;
+        }
+        
+        const member = list[count];
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        
+        assignedMemberEl.classList.remove('pulse');
+        assignedMemberEl.textContent = member;
+        assignedMemberEl.classList.add('pulse');
+        
+        assignmentDisplay.classList.add('active');
+        
+        const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        history.unshift({ member, time: timeString });
+        localStorage.setItem(historyKey, JSON.stringify(history));
+        
+        const allHistory = JSON.parse(localStorage.getItem(allHistoryKey) || '{}');
+        if (!allHistory[todayKey]) allHistory[todayKey] = [];
+        allHistory[todayKey].push({ member, time: timeString, timestamp: now.getTime() });
+        localStorage.setItem(allHistoryKey, JSON.stringify(allHistory));
+        
+        count++;
+        localStorage.setItem(countKey, count.toString());
+        
+        updateUI();
+        showToast(`Assigned: ${member}`);
+      } catch (e) {
+        console.error('Error assigning member:', e);
+        showToast('Failed to assign member', 'error');
+      }
+    }
+
+    function resetDailyAssignments() {
+      try {
+        showConfirmationModal(
+          'Reset Assignments',
+          'Are you sure you want to reset today\'s assignments? This will shuffle the team and clear today\'s history.',
+          () => {
+            try {
+              const shuffled = shuffleArray(team);
+              
+              localStorage.setItem(listKey, JSON.stringify(shuffled));
+              localStorage.setItem(countKey, '0');
+              localStorage.setItem(historyKey, JSON.stringify([]));
+              
+              assignmentPromptEl.textContent = 'Click Assign to select a team member';
+              assignedMemberEl.textContent = '';
+              assignedMemberEl.classList.remove('pulse');
+              assignmentDisplay.classList.remove('active');
+              
+              updateUI();
+              showToast('Assignments reset');
+              hideConfirmationModal();
+            } catch (e) {
+              console.error('Error resetting assignments:', e);
+              showToast('Failed to reset assignments', 'error');
+            }
+          }
+        );
+      } catch (e) {
+        console.error('Error initiating reset:', e);
+        showToast('Failed to initiate reset', 'error');
+      }
+    }
+
+    function downloadFile(content, fileName, mimeType) {
+      try {
+        const blob = new Blob([content], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (e) {
+        console.error('Error downloading file:', e);
+        showToast('Failed to download file', 'error');
+      }
+    }
+
+    function exportTodayData() {
+      try {
+        const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+        if (history.length === 0) {
+          showToast('No assignments today', 'warning');
+          return;
+        }
+        let csvContent = 'Date,Member,Time\n';
+        history.forEach(item => {
+          csvContent += `${todayKey},"${item.member.replace(/"/g, '""')}",${item.time}\n`;
+        });
+        downloadFile(csvContent, `assignments_${todayKey}.csv`, 'text/csv;charset=utf-8;');
+        showToast('Today\'s data exported');
+      } catch (e) {
+        console.error('Error exporting today\'s data:', e);
+        showToast('Failed to export data', 'error');
+      }
+    }
+
+    function exportDateRangeData() {
+      try {
+        const startDate = new Date(exportStartDate.value);
+        const endDate = new Date(exportEndDate.value);
+        if (isNaN(startDate.getTime()) || !exportStartDate.value) {
+          showToast('Select a valid start date', 'error');
+          return;
+        }
+        if (isNaN(endDate.getTime()) || !exportEndDate.value) {
+          showToast('Select a valid end date', 'error');
+          return;
+        }
+        if (startDate > endDate) {
+          showToast('End date must be after start date', 'error');
+          return;
+        }
+        const allHistory = JSON.parse(localStorage.getItem(allHistoryKey) || '{}');
+        let csvContent = 'Date,Member,Time\n';
+        let hasData = false;
+        for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+          const dateKey = date.toISOString().split('T')[0];
+          const dayHistory = allHistory[dateKey] || [];
+          dayHistory.forEach(item => {
+            csvContent += `${dateKey},"${item.member.replace(/"/g, '""')}",${item.time}\n`;
+            hasData = true;
+          });
+        }
+        if (!hasData) {
+          showToast('No assignments in date range', 'warning');
+          return;
+        }
+        downloadFile(
+          csvContent,
+          `assignments_${exportStartDate.value}_to_${exportEndDate.value}.csv`,
+          'text/csv;charset=utf-8;'
+        );
+        showToast('Date range exported');
+      } catch (e) {
+        console.error('Error exporting date range:', e);
+        showToast('Failed to export date range', 'error');
+      }
+    }
+
+    function exportAllData() {
+      try {
+        const allHistory = JSON.parse(localStorage.getItem(allHistoryKey) || '{}');
+        let csvContent = 'Date,Member,Time\n';
+        let hasData = false;
+        Object.keys(allHistory).sort().forEach(date => {
+          allHistory[date].forEach(item => {
+            csvContent += `${date},"${item.member.replace(/"/g, '""')}",${item.time}\n`;
+            hasData = true;
+          });
+        });
+        if (!hasData) {
+          showToast('No assignment history', 'warning');
+          return;
+        }
+        downloadFile(
+          csvContent,
+          `all_assignments_${todayKey}.csv`,
+          'text/csv;charset=utf-8;'
+        );
+        showToast('All data exported');
+      } catch (e) {
+        console.error('Error exporting all data:', e);
+        showToast('Failed to export all data', 'error');
+      }
+    }
+
+    function backupSystem() {
+      try {
+        const backupData = {
+          team: JSON.parse(localStorage.getItem(teamKey) || JSON.stringify(team)),
+          adminPassword: localStorage.getItem(adminPasswordKey) || DEFAULT_ADMIN_PASSWORD,
+          allHistory: JSON.parse(localStorage.getItem(allHistoryKey) || '{}'),
+          version: VERSION,
+          timestamp: new Date().toISOString()
+        };
+        downloadFile(
+          JSON.stringify(backupData, null, 2),
+          `dispatch_backup_${todayKey}.json`,
+          'application/json'
+        );
+        showToast('System backed up');
+      } catch (e) {
+        console.error('Error creating backup:', e);
+        showToast('Failed to create backup', 'error');
+      }
+    }
+
+    function importBackup() {
+      try {
+        importFile.click();
+      } catch (e) {
+        console.error('Error initiating import:', e);
+        showToast('Failed to initiate import', 'error');
+      }
+    }
+
+    function handleImportBackup(event) {
+      try {
+        const file = event.target.files[0];
+        if (!file) {
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (data.version !== VERSION) {
+              showToast('Backup version mismatch', 'warning');
+            }
+            if (data.team) {
+              team = data.team;
+              localStorage.setItem(teamKey, JSON.stringify(team));
+            }
+            if (data.adminPassword) {
+              localStorage.setItem(adminPasswordKey, data.adminPassword);
+            }
+            if (data.allHistory) {
+              localStorage.setItem(allHistoryKey, JSON.stringify(data.allHistory));
+            }
+            initializeDailyData();
+            updateUI();
+            showToast('Backup imported');
+          } catch (err) {
+            console.error('Error parsing backup:', err);
+            showToast('Invalid backup file', 'error');
+          }
+          importFile.value = '';
+        };
+        reader.readAsText(file);
+      } catch (e) {
+        console.error('Error handling import:', e);
+        showToast('Failed to import backup', 'error');
+      }
+    }
+
+    function toggleTheme() {
+      try {
+        document.body.classList.toggle('light-theme');
+        const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        localStorage.setItem(themeKey, theme);
+        showToast(`Switched to ${theme} theme`);
+      } catch (e) {
+        console.error('Error toggling theme:', e);
+        showToast('Failed to toggle theme', 'error');
+      }
+    }
+
+    function loadTheme() {
+      try {
+        const theme = localStorage.getItem(themeKey) || 'dark';
+        if (theme === 'light') document.body.classList.add('light-theme');
+      } catch (e) {
+        console.error('Error loading theme:', e);
+        showToast('Failed to load theme', 'error');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        if (!localStorage.getItem(adminPasswordKey)) {
+          localStorage.setItem(adminPasswordKey, DEFAULT_ADMIN_PASSWORD);
+        }
+        if (!localStorage.getItem(allHistoryKey)) {
+          localStorage.setItem(allHistoryKey, JSON.stringify({}));
+        }
+        
+        loadTheme();
+        updateDateTime();
+        loadTeam();
+        initializeDailyData();
+        
+        assignButton.addEventListener('click', assignTeamMember);
+        resetButton.addEventListener('click', resetDailyAssignments);
+        addMemberButton.addEventListener('click', addNewMember);
+        deleteMemberButton.addEventListener('click', deleteMember);
+        logoutButton.addEventListener('click', logout);
+        exportTodayBtn.addEventListener('click', exportTodayData);
+        exportRangeBtn.addEventListener('click', exportDateRangeData);
+        exportAllBtn.addEventListener('click', exportAllData);
+        backupBtn.addEventListener('click', backupSystem);
+        importBtn.addEventListener('click', importBackup);
+        importFile.addEventListener('change', handleImportBackup);
+        changePasswordBtn.addEventListener('click', changePassword);
+        themeToggleButton.addEventListener('click', toggleTheme);
+        loginButton.addEventListener('click', checkAdminStatus);
+        
+        modalConfirm.addEventListener('click', saveMember);
+        modalCancel.addEventListener('click', hideMemberModal);
+        modalClose.addEventListener('click', hideMemberModal);
+        confirmCancel.addEventListener('click', hideConfirmationModal);
+        confirmClose.addEventListener('click', hideConfirmationModal);
+        
+        memberModal.addEventListener('click', (e) => {
+          if (e.target === memberModal) hideMemberModal();
+        });
+        
+        confirmModal.addEventListener('click', (e) => {
+          if (e.target === confirmModal) hideConfirmationModal();
+        });
+        
+        adminPasswordInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') checkAdminStatus();
+        });
+        
+        adminPasswordInput.focus();
+        setInterval(updateDateTime, 60000);
+      } catch (e) {
+        console.error('Error during initialization:', e);
+        showToast('System failed to initialize', 'error');
+      }
+    });
+
+    window.resetAdminPassword = function() {
+      localStorage.setItem(adminPasswordKey, DEFAULT_ADMIN_PASSWORD);
+      showToast('Password reset to default: awccmw@123', 'warning');
+    };
+  </script>
+</body>
+</html>
